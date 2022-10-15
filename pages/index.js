@@ -38,6 +38,7 @@ ChartJS.register(
 );
 
 export const options = {
+  maintainAspectRatio: false,
   responsive: true,
   legend: {
     position: 'top',
@@ -132,7 +133,7 @@ export default function Home() {
 
   return (
     <div>
-      <Line options={options} ref={chartRef} data={graphData} />
+      <Line className="chart" options={options} ref={chartRef} data={graphData} />
     </div>
   )
 }
