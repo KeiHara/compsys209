@@ -132,7 +132,6 @@ export default function Home() {
 
   return (
     <div>
-      <h1>Arduino Data</h1>
       <Line options={options} ref={chartRef} data={graphData} />
     </div>
   )
