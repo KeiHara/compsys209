@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 import React, { useEffect, createRef } from 'react';
-import { useRouter } from 'next/router'
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -27,6 +27,7 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 ChartJS.register(
+  ChartDataLabels,
   CategoryScale,
   LinearScale,
   PointElement,
@@ -45,6 +46,20 @@ export const options = {
     display: true,
     text: 'Chart.js Line Chart',
   },
+  plugins: {
+    datalabels: {
+      backgroundColor: function(context) {
+        return context.dataset.backgroundColor;
+      },
+      borderRadius: 4,
+      color: 'white',
+      font: {
+        weight: 'bold'
+      },
+      formatter: Math.round,
+      padding: 6
+    }
+  }
 }
 
 
@@ -60,6 +75,10 @@ export default function Home() {
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
         tension: 0.25,
+        datalabels: {
+          align: 'start',
+          anchor: 'start'
+        }
       },
       {
         label: 'Current',
@@ -67,6 +86,10 @@ export default function Home() {
         borderColor: 'rgb(53, 162, 235)',
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
         tension: 0.25,
+        datalabels: {
+          align: 'start',
+          anchor: 'start'
+        }
       },
       {
         label: 'Power',
@@ -74,6 +97,10 @@ export default function Home() {
         borderColor: 'rgb(75, 192, 192)',
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
         tension: 0.25,
+        datalabels: {
+          align: 'start',
+          anchor: 'start'
+        }
       },
 
     ]
