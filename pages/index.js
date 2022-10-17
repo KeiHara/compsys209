@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 import React, { useEffect, createRef } from 'react';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,13 +15,14 @@ import {
 import { Line } from 'react-chartjs-2';
 
 const app = initializeApp({
-  apiKey: "AIzaSyD1oL73rsUYtObQm0pPGAtPjS0rrFslDcc",
-  authDomain: "compsys209-b17db.firebaseapp.com",
-  projectId: "compsys209-b17db",
-  storageBucket: "compsys209-b17db.appspot.com",
-  messagingSenderId: "701805363223",
-  appId: "1:701805363223:web:e8ac059e6fa718d9aa5c52",
-  measurementId: "G-HTBNKYFQVS"
+  apiKey: "AIzaSyC8c2aceapQj5tFeCa2oSTtheQyyZ3weDQ",
+  authDomain: "ee209-tracker.firebaseapp.com",
+  databaseURL: "https://ee209-tracker-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ee209-tracker",
+  storageBucket: "ee209-tracker.appspot.com",
+  messagingSenderId: "870740457918",
+  appId: "1:870740457918:web:681fdbc9198844b594a1ef",
+  measurementId: "G-QW24NWCENE"
 })
 
 const db = getFirestore(app);
