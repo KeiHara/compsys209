@@ -27,45 +27,60 @@ const app = initializeApp({
 const db = getFirestore(app);
 
 ChartJS.register(
-  ChartDataLabels,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
 );
 
 export const options = {
-  maintainAspectRatio: false,
   responsive: true,
-  legend: {
-    position: 'top',
+  interaction: {
+    mode: "index" ,
+    intersect: false
   },
-  title: {
-    display: true,
-    text: 'Chart.js Line Chart',
-  },
+  stacked: false,
   plugins: {
-    datalabels: {
-      backgroundColor: function(context) {
-        return context.dataset.backgroundColor;
-      },
-      borderRadius: 4,
-      color: 'white',
-      font: {
-        weight: 'bold'
-      },
-      formatter: Math.round,
-      padding: 6
+    title: {
+      display: true,
+      text: "Energy Monitor - COMPSYS 209 Project - 2022",
+    }
+  },
+  scales: {
+    y: {
+      type: "linear",
+      display: true,
+      position: "left",
+      suggestedMin: -700,
+      suggestedMax: 700,
+    },
+    y1: {
+      type: "linear",
+      display: true,
+      position: "right",
+      suggestedMax: 14000,
+      suggestedMin: -14000
+    },
+    y2: {
+      type: "linear",
+      display: true,
+      position: "left",
+      suggestedMax: 10000,
+      suggestedMin: -10000
     }
   }
-}
-
+};
 
 
 export default function Home() {
+  // create a power, voltage, current variable to display in html
+  const [power, setPower] = React.useState(0);
+  const [voltage, setVoltage] = React.useState(0);
+  const [current, setCurrent] = React.useState(0);
+
   const chartRef = createRef()
   let graphData = {
     labels: [],
@@ -73,38 +88,30 @@ export default function Home() {
       {
         label: 'Voltage',
         data: [],
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        borderColor: 'rgb(255, 205, 86)',
+        backgroundColor: 'rgba(255, 205, 86, 0.5)',
         tension: 0.25,
-        datalabels: {
-          align: 'start',
-          anchor: 'start'
-        }
+        yAxisID: 'y1'
       },
       {
         label: 'Current',
         data: [],
-        borderColor: 'rgb(53, 162, 235)',
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        borderColor: 'rgb(54, 162, 235)',
+        backgroundColor: 'rgba(54, 162, 235, 0.5)',
         tension: 0.25,
-        datalabels: {
-          align: 'start',
-          anchor: 'start'
-        }
+        yAxisID: 'y',
       },
       {
         label: 'Power',
         data: [],
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
         tension: 0.25,
-        datalabels: {
-          align: 'start',
-          anchor: 'start'
-        }
-      },
+        yAxisID: 'y2',
+      }
 
-    ]
+    ],
+    options: options
   }
   // get real-time updates from the database
   useEffect(() => {
@@ -115,25 +122,40 @@ export default function Home() {
         id: doc.id,
         ...doc.data()
       }))
-      const date = new Date(data[0].timestamp * 1000)
-      chartRef.current.data.labels.push(`${date.getMinutes()}:${date.getSeconds()}`)
-      chartRef.current.data.datasets[0].data.push(data[0].voltage)
-      chartRef.current.data.datasets[1].data.push(data[0].current)
-      chartRef.current.data.datasets[2].data.push(data[0].power)
-      chartRef.current.update();
-      if (chartRef.current.data.labels.length >= 10) {
-        chartRef.current.data.labels.shift();
-        chartRef.current.data.datasets[0].data.shift();
-        chartRef.current.data.datasets[1].data.shift();
-        chartRef.current.data.datasets[2].data.shift();
+
+      if (data[0]['raw-voltage'].length < 20 || data[0]['raw-current'].length < 100) {
+        return;
       }
+
+      // update the power variable
+      setPower(data[0].power);
+      setVoltage(data[0].voltage);
+      setCurrent(data[0].current);
+      // split raw-voltage into a array by character ^
+      // labels 1 to 40
+      chartRef.current.data.labels = [...Array(data[0]["raw-voltage"].split("^").length).keys()].map((i) => i + 1)
+
+      chartRef.current.data.datasets[0].data = (data[0]["raw-voltage"].split("^"))
+      chartRef.current.data.datasets[1].data = (data[0]["raw-current"].split("^"))
+      // multiply raw voltage by current and divide by 1000 to get power with rounding
+      chartRef.current.data.datasets[2].data = (data[0]["raw-voltage"].split("^").map((voltage, index) => Math.round((voltage * data[0]["raw-current"].split("^")[index]) / 1000)))
+
+      chartRef.current.update();
     });
     return () => unsubscribe();
   }, []);
 
   return (
-    <div>
-      <Line className="chart" options={options} ref={chartRef} data={graphData} />
-    </div>
+      <div>
+        <Line className="chart" options={options} ref={chartRef} data={graphData} />
+        <div>
+          <div style={{textAlign: "center"}}>
+            <h1> Average Power: {power} mW </h1>
+            <h1> RMS Voltage: {voltage} mV </h1>
+            <h1> RMS Current: {current} mA </h1>
+          </div>
+
+        </div>
+      </div>
   )
 }
